@@ -155,7 +155,7 @@ contract ArborSwapLock is IArborSwapLock, Ownable{
     ) external payable override returns (uint256 id) {
         require(token != address(0), "Invalid token");
         require(amount > 0, "Amount should be greater than 0");
-        //require(tgeDate > block.timestamp, "TGE date should be in the future");
+        require(tgeDate > block.timestamp, "TGE date should be in the future");
         require(cycle > 0, "Invalid cycle");
         require(tgeBps > 0 && tgeBps < 10_000, "Invalid bips for TGE");
         require(cycleBps > 0 && cycleBps < 10_000, "Invalid bips for cycle");
