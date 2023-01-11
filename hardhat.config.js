@@ -16,11 +16,11 @@ module.exports = {
       }
       
     },
-    binance: {
-       url: "https://bsc-dataseed3.ninicoin.io/",
-       accounts:[env.process.PRIVATE_KEY],
-       allowUnlimitedContractSize: true
-    }
+   // binance: {
+   //    url: "https://bsc-dataseed3.ninicoin.io/",
+   //    accounts:[env.process.PRIVATE_KEY],
+   //    allowUnlimitedContractSize: true
+   // }
     
   },  
   gasReporter: {
@@ -28,7 +28,7 @@ module.exports = {
     currency: "USD",
   },
   etherscan: {
-    apiKey: [env.process.API_KEY],
+    apiKey: [],
     
   },
   
