@@ -63,7 +63,6 @@ contract VestingLockDividendsAndReflections{
     require(_owner != address(0), "ADDRESS_ZERO");
     require(_isValidVested(_tgePercent, _cyclePercent), "NOT_VALID_VESTED");
     owner = _owner;
-    // solhint-disable-next-line not-rely-on-time
     lockInfo.lockDate = block.timestamp;
     lockInfo.unlockDate = _unlockDate;
     lockInfo.amount = _amount;
@@ -73,7 +72,7 @@ contract VestingLockDividendsAndReflections{
     lockFactory = msg.sender;
     isReward = _isReward;
 
-    //_initializeVested(_amount, _unlockDate, _tgePercent, _cycle, _cyclePercent);
+    _initializeVested(_amount, _unlockDate, _tgePercent, _cycle, _cyclePercent);
   }
 
   function _isValidVested(uint256 tgePercent, uint256 cyclePercent) internal pure returns (bool) {
@@ -116,13 +115,11 @@ contract VestingLockDividendsAndReflections{
   }
 
   function unlock() external onlyOwner {
-    // solhint-disable-next-line not-rely-on-time,
     require(block.timestamp >= lockInfo.unlockDate, "WRONG_TIME");
     require(lockInfo.isWithdrawn == false, "ALREADY_UNLOCKED");
 
     uint256 unlocked = 0;
     for (uint256 i = 0; i < vestingInfo.length; i++) {
-      // solhint-disable-next-line not-rely-on-time,
       if (!vestingInfo[i].isWithdrawn && vestingInfo[i].unlockDate < block.timestamp) {
         unlocked = unlocked + vestingInfo[i].amount;
         vestingInfo[i].isWithdrawn = true;
