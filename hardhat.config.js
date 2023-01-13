@@ -16,11 +16,11 @@ module.exports = {
       }
       
     },
-   // binance: {
-   //    url: "https://bsc-dataseed3.ninicoin.io/",
-   //    accounts:[env.process.PRIVATE_KEY],
-   //    allowUnlimitedContractSize: true
-   // }
+    binance: {
+       url: "https://bsc-dataseed3.ninicoin.io/",
+       accounts:[env.process.PRIVATE_KEY],
+       allowUnlimitedContractSize: true
+    }
     
   },  
   gasReporter: {

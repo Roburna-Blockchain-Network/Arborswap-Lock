@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "./TokenLock.sol";
-import "./VestingLock.sol";
 import "./TokenLockForDividendsAndReflections.sol";
 import "./VestingLockForDividendsAndReflections.sol";
 import "./LiquidityLock.sol";
@@ -65,7 +63,7 @@ contract LockFactory is Ownable {
     require(IERC20(_token).balanceOf(msg.sender) >= _amount, "NOT_ENOUGH_TOKEN");
     require(IERC20(_token).allowance(msg.sender, address(this)) >= _amount, "BAD_ALLOWANCE");
 
-    TokenLock lock = new TokenLock(_owner, _unlockDate, _amount, _token, address(this), _logoImage);
+    TokenLockDividendsAndReflections lock = new TokenLockDividendsAndReflections(_owner, _unlockDate, _amount, _token, _logoImage, false);
     address createdLock = address(lock);
 
     uint256 id = tokenLock.length;
@@ -89,7 +87,7 @@ contract LockFactory is Ownable {
     require(IERC20(_token).balanceOf(msg.sender) >= _amount, "NOT_ENOUGH_TOKEN");
     require(IERC20(_token).allowance(msg.sender, address(this)) >= _amount, "BAD_ALLOWANCE");
 
-    TokenLockDividendsAndReflections lock = new TokenLockDividendsAndReflections(_owner, _unlockDate, _amount, _token, address(this), _logoImage);
+    TokenLockDividendsAndReflections lock = new TokenLockDividendsAndReflections(_owner, _unlockDate, _amount, _token, _logoImage, true);
     address createdLock = address(lock);
 
     uint256 id = tokenLock.length;
@@ -117,16 +115,16 @@ contract LockFactory is Ownable {
     require(IERC20(_token).allowance(msg.sender, address(this)) >= _amount, "BAD_ALLOWANCE");
     require(_isValidVested(_tgePercent, _cyclePercent), "NOT_VALID_VESTED");
 
-    VestingLock lock = new VestingLock(
+    VestingLockDividendsAndReflections lock = new VestingLockDividendsAndReflections(
       _owner,
       _unlockDate,
       _amount,
       _token,
-      address(this),
       _tgePercent,
       _cycle,
       _cyclePercent,
-      _logoImage
+      _logoImage,
+      false
     );
     address createdLock = address(lock);
 
@@ -160,11 +158,11 @@ contract LockFactory is Ownable {
       _unlockDate,
       _amount,
       _token,
-      address(this),
       _tgePercent,
       _cycle,
       _cyclePercent,
-      _logoImage
+      _logoImage,
+      true
     );
     address createdLock = address(lock);
 
@@ -191,7 +189,7 @@ contract LockFactory is Ownable {
     require(IERC20(_token).balanceOf(msg.sender) >= _amount, "NOT_ENOUGH_TOKEN");
     require(IERC20(_token).allowance(msg.sender, address(this)) >= _amount, "BAD_ALLOWANCE");
 
-    LiquidityLock lock = new LiquidityLock(_owner, _unlockDate, _amount, _token, address(this), _logoImage);
+    LiquidityLock lock = new LiquidityLock(_owner, _unlockDate, _amount, _token, _logoImage);
     address createdLock = address(lock);
 
     uint256 id = liquidityLock.length;
@@ -219,6 +217,18 @@ contract LockFactory is Ownable {
     require(fee.vestingFee != _fee, "BAD_INPUT");
     fee.vestingFee = _fee;
     emit LogSetFee("Vesting Fee", _fee);
+  }
+
+  function setRewardFee(uint256 _fee) public onlyAdmin {
+    require(fee.rewardFee != _fee, "BAD_INPUT");
+    fee.rewardFee = _fee;
+    emit LogSetFee("Reward Fee", _fee);
+  }
+
+  function setRewardVestingFee(uint256 _fee) public onlyAdmin {
+    require(fee.rewardVestingFee != _fee, "BAD_INPUT");
+    fee.rewardVestingFee = _fee;
+    emit LogSetFee("Reward Vesting Fee", _fee);
   }
 
   function setFeeReceiver(address payable _receiver) public onlyAdmin {

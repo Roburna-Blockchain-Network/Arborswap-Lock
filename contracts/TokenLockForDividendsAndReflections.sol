@@ -7,6 +7,8 @@ import "@openzeppelin/contracts/interfaces/IERC20.sol";
 contract TokenLockDividendsAndReflections {
   using SafeMath for uint256;
 
+  bool public isReward;
+
   struct LockInfo {
     IERC20 token;
     uint256 amount;
@@ -26,6 +28,10 @@ contract TokenLockDividendsAndReflections {
     require(msg.sender == owner, "ONLY_OWNER");
     _;
   }
+  modifier onlyRewardLock() {
+    require(isReward == true, "ONLY_REWARDLOCK");
+    _;
+  }
   modifier onlyOwnerOrFactory() {
     require(msg.sender == owner || msg.sender == lockFactory, "ONLY_OWNER_OR_FACTORY");
     _;
@@ -43,8 +49,8 @@ contract TokenLockDividendsAndReflections {
     uint256 _unlockDate,
     uint256 _amount,
     address _token,
-    address _factory,
-    string memory _logoImage
+    string memory _logoImage,
+    bool _isReward
   ) {
     require(_owner != address(0), "ADDRESS_ZERO");
     owner = _owner;
@@ -55,7 +61,8 @@ contract TokenLockDividendsAndReflections {
     lockInfo.token = IERC20(_token);
     lockInfo.logoImage = _logoImage;
     lockInfo.isVesting = false;
-    lockFactory = _factory;
+    isReward = _isReward;
+    lockFactory = msg.sender;
   }
 
   function extendLockTime(uint256 newUnlockDate) external onlyOwner {
@@ -86,7 +93,7 @@ contract TokenLockDividendsAndReflections {
     emit LogWithdraw(owner, lockInfo.amount);
   }
 
-  function withdrawReflections() external onlyOwner {
+  function withdrawReflections() external onlyRewardLock onlyOwner {
     if (lockInfo.isWithdrawn) {
       uint256 reflections = lockInfo.token.balanceOf(address(this));
       if (reflections > 0) {
@@ -103,7 +110,7 @@ contract TokenLockDividendsAndReflections {
     }
   }
 
-  function withdrawDividends(address _token) external onlyOwner {
+  function withdrawDividends(address _token) external onlyRewardLock onlyOwner {
     require(_token != address(lockInfo.token), "CANT_WITHDRAW_LOCKED_ASSETS");
     uint256 dividends = IERC20(_token).balanceOf(address(this));
     if (dividends > 0) {

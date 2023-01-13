@@ -42,7 +42,6 @@ contract LiquidityLock {
     uint256 _unlockDate,
     uint256 _amount,
     address _token,
-    address _factory,
     string memory _logoImage
   ) {
     require(_owner != address(0), "ADDRESS_ZERO");
@@ -53,7 +52,7 @@ contract LiquidityLock {
     lockInfo.amount = _amount;
     lockInfo.token = IUniswapV2Pair(_token);
     lockInfo.logoImage = _logoImage;
-    lockFactory = _factory;
+    lockFactory = msg.sender;
   }
 
   function extendLockTime(uint256 newUnlockDate) external onlyOwner {

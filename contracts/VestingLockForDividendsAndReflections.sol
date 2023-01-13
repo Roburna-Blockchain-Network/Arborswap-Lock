@@ -7,6 +7,8 @@ import "@openzeppelin/contracts/interfaces/IERC20.sol";
 contract VestingLockDividendsAndReflections{
   using SafeMath for uint256;
 
+  bool public isReward;
+
   struct LockInfo {
     IERC20 token;
     uint256 amount;
@@ -33,6 +35,10 @@ contract VestingLockDividendsAndReflections{
     require(msg.sender == owner, "ONLY_OWNER");
     _;
   }
+  modifier onlyRewardLock() {
+    require(isReward == true, "ONLY_REWARDLOCK");
+    _;
+  }
   modifier onlyOwnerOrFactory() {
     require(msg.sender == owner || msg.sender == lockFactory, "ONLY_OWNER_OR_FACTORY");
     _;
@@ -48,11 +54,11 @@ contract VestingLockDividendsAndReflections{
     uint256 _unlockDate,
     uint256 _amount,
     address _token,
-    address _factory,
     uint256 _tgePercent,
     uint256 _cycle,
     uint256 _cyclePercent,
-    string memory _logoImage
+    string memory _logoImage,
+    bool _isReward
   ) {
     require(_owner != address(0), "ADDRESS_ZERO");
     require(_isValidVested(_tgePercent, _cyclePercent), "NOT_VALID_VESTED");
@@ -64,9 +70,10 @@ contract VestingLockDividendsAndReflections{
     lockInfo.token = IERC20(_token);
     lockInfo.logoImage = _logoImage;
     lockInfo.isVesting = true;
-    lockFactory = _factory;
+    lockFactory = msg.sender;
+    isReward = _isReward;
 
-    _initializeVested(_amount, _unlockDate, _tgePercent, _cycle, _cyclePercent);
+    //_initializeVested(_amount, _unlockDate, _tgePercent, _cycle, _cyclePercent);
   }
 
   function _isValidVested(uint256 tgePercent, uint256 cyclePercent) internal pure returns (bool) {
@@ -140,7 +147,7 @@ contract VestingLockDividendsAndReflections{
     return locked;
   }
 
-  function withdrawReflections() external onlyOwner {
+  function withdrawReflections() external onlyRewardLock onlyOwner {
     if (lockInfo.isWithdrawn) {
       uint256 reflections = lockInfo.token.balanceOf(address(this));
       if (reflections > 0) {
@@ -158,7 +165,7 @@ contract VestingLockDividendsAndReflections{
     }
   }
 
-  function withdrawDividends(address _token) external onlyOwner {
+  function withdrawDividends(address _token) external onlyRewardLock onlyOwner {
     require(_token != address(lockInfo.token), "CANT_WITHDRAW_LOCKED_ASSETS");
     uint256 dividends = IERC20(_token).balanceOf(address(this));
     if (dividends > 0) {
